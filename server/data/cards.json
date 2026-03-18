@@ -1,0 +1,20 @@
+[
+  {
+    "id": "17724543220500",
+    "key": "653531BB842000CE",
+    "duration": 30,
+    "type": "premium",
+    "used": true,
+    "createdAt": "2026-03-02T12:25:22.050Z",
+    "usedAt": "2026-03-02T12:25:32.530Z"
+  },
+  {
+    "id": "17724548938880",
+    "key": "FD6F6AE1986F20AE",
+    "duration": 1,
+    "type": "normal",
+    "used": true,
+    "createdAt": "2026-03-02T12:34:53.888Z",
+    "usedAt": "2026-03-02T12:35:11.718Z"
+  }
+]

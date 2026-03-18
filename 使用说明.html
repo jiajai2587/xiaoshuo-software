@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小说创作大师 - 使用说明</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .header p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    .nav {
+      background: #f9fafb;
+      padding: 16px 40px;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav a {
+      color: #374151;
+      text-decoration: none;
+      margin-right: 24px;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav a:hover { color: #3b82f6; }
+    .content { padding: 40px; }
+    .section { margin-bottom: 48px; }
+    .section h2 {
+      font-size: 24px;
+      color: #1f2937;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 3px solid #3b82f6;
+      display: inline-block;
+    }
+    .section h3 {
+      font-size: 18px;
+      color: #374151;
+      margin: 24px 0 12px 0;
+    }
+    .section p {
+      color: #4b5563;
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+    .section ul, .section ol {
+      margin-left: 24px;
+      margin-bottom: 16px;
+    }
+    .section li {
+      color: #4b5563;
+      line-height: 2;
+    }
+    .code {
+      background: #1f2937;
+      color: #10b981;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+    .card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+    .card h4 {
+      color: #1f2937;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+    .tip {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .success {
+      background: #f0fdf4;
+      border-left: 4px solid #10b981;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #374151;
+    }
+    td { color: #4b5563; }
+    .step-num {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      background: #3b82f6;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 32px;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+    .footer {
+      text-align: center;
+      padding: 32px;
+      background: #f9fafb;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      transition: transform 0.2s;
+    }
+    .back-to-top:hover { transform: translateY(-3px); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📖 小说创作大师</h1>
+      <p>详细使用说明 - AI 智能写作软件</p>
+    </div>
+
+    <div class="nav">
+      <a href="#install">安装指南</a>
+      <a href="#quickstart">快速入门</a>
+      <a href="#features">功能详解</a>
+      <a href="#faq">常见问题</a>
+      <a href="#tips">写作技巧</a>
+    </div>
+
+    <div class="content">
+      <div class="section" id="install">
+        <h2>📦 安装指南</h2>
+        
+        <h3>系统要求</h3>
+        <ul>
+          <li><strong>操作系统</strong>: Windows 10 或更高版本</li>
+          <li><strong>内存</strong>: 建议 4GB 以上</li>
+          <li><strong>磁盘空间</strong>: 至少 500MB 可用空间</li>
+        </ul>
+
+        <div class="card">
+          <h4>🌐 快速开始 - 浏览器版本（推荐）</h4>
+          <p>无需安装任何软件，直接双击 <code>browser-version.html</code> 即可使用！</p>
+        </div>
+
+        <h3>第一步：安装 Node.js（仅 Electron 版本需要）</h3>
+        <ol>
+          <li>访问 Node.js 官网：<a href="https://nodejs.org/" target="_blank" style="color:#3b82f6;">https://nodejs.org/</a></li>
+          <li>下载 <strong>LTS (长期支持)</strong> 版本（推荐）</li>
+          <li>运行安装程序，按默认设置完成安装</li>
+          <li>验证安装：打开命令提示符，输入 <code>node -v</code>，显示版本号即为成功</li>
+        </ol>
+
+        <h3>第二步：安装项目依赖</h3>
+        <ol>
+          <li>打开项目文件夹：<code>c:\Users\Administrator\Desktop\客户</code></li>
+          <li>在文件夹中按住 <code>Shift</code> 键，右键点击空白处</li>
+          <li>选择「在此处打开 PowerShell 窗口」</li>
+          <li>输入以下命令并回车：</li>
+        </ol>
+        <div class="code">npm install</div>
+        <p class="tip">💡 等待安装完成（可能需要几分钟）</p>
+
+        <h3>第三步：运行软件</h3>
+        
+        <h4>开发模式运行（推荐用于测试）</h4>
+        <div class="code">npm run electron:dev</div>
+        
+        <h4>构建生产版本（打包成 .exe 安装包）</h4>
+        <div class="code">npm run electron:build</div>
+        <p>构建完成后，安装包位于 <code>dist-electron</code> 文件夹中。</p>
+      </div>
+
+      <div class="section" id="quickstart">
+        <h2>🚀 快速入门</h2>
+        
+        <div class="card">
+          <h4>📋 完整工作流程示例</h4>
+          
+          <h3><span class="step-num">1</span> 登录 DeepSeek</h3>
+          <ul>
+            <li>启动软件后，点击左侧菜单「<strong>捕获进度</strong>」</li>
+            <li>点击「<strong>打开 DeepSeek</strong>」按钮</li>
+            <li>在弹出的浏览器中使用微信扫码或账号登录</li>
+            <li>登录成功后保持浏览器打开</li>
+          </ul>
+
+          <h3><span class="step-num">2</span> 创建你的第一个小说项目</h3>
+          <ul>
+            <li>点击左侧菜单「<strong>项目管理</strong>」</li>
+            <li>点击「<strong>新建项目</strong>」按钮</li>
+            <li>填写项目信息：
+              <ul>
+                <li><strong>项目名称</strong>: 例如「我的玄幻小说」</li>
+                <li><strong>项目描述</strong>: 简单描述故事背景</li>
+                <li><strong>作者角色</strong>: <code>你是一位资深的网络小说作家，擅长创作引人入胜的玄幻故事，文笔流畅，情节紧凑。</code></li>
+                <li><strong>创作规则</strong>:
+                  <pre style="background:#f3f4f6;padding:12px;border-radius:6px;margin:8px 0;">1. 语言口语化，符合网络小说风格
+2. 每章设置悬念，吸引读者继续阅读
+3. 人物形象鲜明，性格突出
+4. 节奏适中，张弛有度</pre>
+                </li>
+                <li><strong>目标字数</strong>: 2000（每章字数）</li>
+                <li><strong>发布平台</strong>: 番茄小说</li>
+              </ul>
+            </li>
+            <li>点击「<strong>创建</strong>」</li>
+          </ul>
+
+          <h3><span class="step-num">3</span> 添加主要角色</h3>
+          <ul>
+            <li>点击左侧菜单「<strong>设定管理</strong>」</li>
+            <li>点击「<strong>添加角色</strong>」</li>
+            <li>填写角色信息：
+              <ul>
+                <li><strong>角色名称</strong>: 主角名</li>
+                <li><strong>角色定位</strong>: 主角</li>
+                <li><strong>当前状态</strong>: 初入秘境，修为低微</li>
+                <li><strong>角色简介</strong>: 详细描述性格、外貌、背景故事</li>
+              </ul>
+            </li>
+            <li>点击「<strong>保存</strong>」</li>
+            <li>重复添加其他重要角色</li>
+          </ul>
+
+          <h3><span class="step-num">4</span> 设定世界观</h3>
+          <ul>
+            <li>在「<strong>设定管理</strong>」页面，点击「<strong>添加设定</strong>」</li>
+            <li>填写设定信息：
+              <ul>
+                <li><strong>设定名称</strong>: 修炼体系</li>
+                <li><strong>设定分类</strong>: 力量体系</li>
+                <li><strong>设定内容</strong>: 详细描述境界划分、修炼方法等</li>
+              </ul>
+            </li>
+            <li>点击「<strong>保存</strong>」</li>
+            <li>继续添加地理环境、势力组织等设定</li>
+          </ul>
+
+          <h3><span class="step-num">5</span> 生成章节大纲</h3>
+          <ul>
+            <li>点击左侧菜单「<strong>章节大纲</strong>」</li>
+            <li>填写信息：
+              <ul>
+                <li><strong>故事创意</strong>: 详细描述你的故事创意、主题、核心情节</li>
+                <li><strong>章节数量</strong>: 10（或根据需要调整）</li>
+                <li><strong>风格类型</strong>: 玄幻</li>
+              </ul>
+            </li>
+            <li>点击「<strong>生成大纲</strong>」</li>
+            <li>在右侧编辑和调整每章的标题和大纲</li>
+            <li>点击「<strong>保存全部</strong>」</li>
+          </ul>
+
+          <h3><span class="step-num">6</span> 生成小说内容</h3>
+          <ul>
+            <li>点击左侧菜单「<strong>小说生成</strong>」</li>
+            <li>从左侧选择要生成的章节（从第1章开始）</li>
+            <li>确认生成选项已勾选：
+              <ul>
+                <li>✅ 使用角色状态</li>
+                <li>✅ 引用世界设定</li>
+                <li>✅ 关联前面章节</li>
+                <li>✅ 自动扩写</li>
+              </ul>
+            </li>
+            <li>点击「<strong>复制提示词</strong>」</li>
+            <li>切换到 DeepSeek 浏览器</li>
+            <li>将提示词粘贴到对话框并发送</li>
+            <li>等待 AI 生成内容</li>
+            <li>将 AI 返回的内容复制</li>
+            <li>回到「小说生成」页面，粘贴到「正文内容」框</li>
+            <li>点击「<strong>保存</strong>」</li>
+            <li>查看智能状态更新建议，点击「应用」更新设定</li>
+            <li>重复此步骤生成后续章节</li>
+          </ul>
+
+          <h3><span class="step-num">7</span> 查看进度</h3>
+          <ul>
+            <li>点击左侧菜单「<strong>生成进度</strong>」</li>
+            <li>查看项目统计、生成进度和操作日志</li>
+            <li>查看所有章节的详细信息</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section" id="features">
+        <h2>💡 功能详解</h2>
+
+        <h3>1. 项目管理</h3>
+        <h4>创建项目</h4>
+        <ul>
+          <li><strong>项目名称</strong>: 给小说起个名字</li>
+          <li><strong>项目描述</strong>: 简要介绍故事</li>
+          <li><strong>作者角色</strong>: 定义 AI 的写作身份，例如：
+            <div class="code">你是一位资深的网络小说作家，拥有十年写作经验，擅长玄幻、都市题材，文笔流畅，情节紧凑，人物塑造鲜明。</div>
+          </li>
+          <li><strong>创作规则</strong>: 设定写作风格和要求，例如：
+            <div class="code">1. 语言要口语化，避免晦涩难懂
+2. 每章结尾必须设置悬念
+3. 对话要符合人物性格
+4. 打斗场景要精彩描写
+5. 注重情感描写和人物成长</div>
+          </li>
+          <li><strong>目标字数</strong>: 建议 1500-3000 字/章</li>
+          <li><strong>发布平台</strong>:
+            <ul>
+              <li><strong>番茄小说</strong>: 节奏快，悬念强，短句多</li>
+              <li><strong>七猫小说</strong>: 类似番茄，可稍长</li>
+              <li><strong>知乎</strong>: 文风可以更细腻</li>
+              <li><strong>通用</strong>: 平衡风格</li>
+            </ul>
+          </li>
+        </ul>
+        <div class="warning">⚠️ 点击「删除」会删除整个项目，此操作不可恢复！</div>
+
+        <h3>2. 章节大纲生成</h3>
+        <h4>生成大纲</h4>
+        <ul>
+          <li><strong>故事创意</strong>: 尽可能详细地描述，包括：
+            <ul>
+              <li>故事主题</li>
+              <li>主角设定</li>
+              <li>核心冲突</li>
+              <li>预期结局</li>
+            </ul>
+          </li>
+          <li><strong>章节数量</strong>: 建议首次 10-20 章</li>
+          <li><strong>风格类型</strong>: 玄幻、都市、仙侠、言情、悬疑、科幻等</li>
+        </ul>
+        <div class="tip">💡 建议详细填写大纲，这直接影响正文质量。大纲应包含：情节发展、人物出场、关键事件、章节悬念</div>
+
+        <h3>3. 小说内容生成</h3>
+        <h4>生成选项说明</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>选项</th>
+              <th>作用</th>
+              <th>建议</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>使用角色状态</td>
+              <td>AI 会参考当前角色状态来写作</td>
+              <td>✅ 始终开启</td>
+            </tr>
+            <tr>
+              <td>引用世界设定</td>
+              <td>AI 会遵守已设定的世界观</td>
+              <td>✅ 始终开启</td>
+            </tr>
+            <tr>
+              <td>关联前面章节</td>
+              <td>AI 会参考前面章节保持连贯</td>
+              <td>✅ 第2章及以后开启</td>
+            </tr>
+            <tr>
+              <td>自动扩写</td>
+              <td>AI 会详细描写达到目标字数</td>
+              <td>✅ 开启</td>
+            </tr>
+          </tbody>
+        </table>
+        <h4>目标字数</h4>
+        <ul>
+          <li>番茄/七猫: 1500-2500 字</li>
+          <li>知乎/其他: 2000-4000 字</li>
+        </ul>
+        <div class="success">✨ 生成内容后，AI 会建议更新角色状态和世界设定，点击「应用」可自动更新！</div>
+
+        <h3>4. 设定管理</h3>
+        <h4>角色管理</h4>
+        <ul>
+          <li><strong>角色定位</strong>:
+            <ul>
+              <li><strong>主角</strong>: 核心人物，详细描述</li>
+              <li><strong>配角</strong>: 重要配角，也需详细</li>
+              <li><strong>反派</strong>: 对手角色</li>
+              <li><strong>其他</strong>: 路人角色</li>
+            </ul>
+          </li>
+          <li><strong>当前状态</strong>: 随时更新，AI 会参考</li>
+          <li><strong>角色简介</strong>: 建议包含：外貌描写、性格特点、背景故事、能力/修为</li>
+        </ul>
+        <h4>世界设定管理</h4>
+        <ul>
+          <li><strong>设定分类</strong>:
+            <ul>
+              <li><strong>世界观</strong>: 时代背景、社会结构</li>
+              <li><strong>力量体系</strong>: 修炼等级、能力系统</li>
+              <li><strong>地理环境</strong>: 地图、地点介绍</li>
+              <li><strong>势力组织</strong>: 门派、家族、国家</li>
+              <li><strong>其他</strong>: 其他重要设定</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>5. 生成进度监控</h3>
+        <ul>
+          <li><strong>项目统计</strong>: 总章节数、已完成数、总字数、平均章节字数</li>
+          <li><strong>操作日志</strong>: 记录所有重要操作，可清空日志</li>
+          <li><strong>章节详情</strong>: 查看所有章节的状态和字数</li>
+        </ul>
+      </div>
+
+      <div class="section" id="faq">
+        <h2>❓ 常见问题</h2>
+
+        <div class="card">
+          <h4>Q: npm install 失败怎么办？</h4>
+          <p>A:</p>
+          <ol>
+            <li>检查网络连接</li>
+            <li>尝试使用淘宝镜像：
+              <div class="code">npm config set registry https://registry.npmmirror.com
+npm install</div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h4>Q: 软件打不开？</h4>
+          <p>A:</p>
+          <ol>
+            <li>确认 Node.js 已正确安装</li>
+            <li>删除 <code>node_modules</code> 文件夹，重新 <code>npm install</code></li>
+            <li>检查是否有杀毒软件拦截</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h4>Q: 如何备份项目数据？</h4>
+          <p>A:</p>
+          <p><strong>浏览器版本</strong>: 点击右上角「导出数据」按钮</p>
+          <p><strong>Electron 版本</strong>: 项目数据存储在：</p>
+          <ul>
+            <li>Windows: <code>C:\Users\你的用户名\AppData\Roaming\novel-creator-pro\</code></li>
+          </ul>
+          <p>定期备份该文件夹即可</p>
+        </div>
+
+        <div class="card">
+          <h4>Q: AI 生成的内容不满意怎么办？</h4>
+          <p>A:</p>
+          <ol>
+            <li>更详细地填写章节大纲</li>
+            <li>完善角色和世界设定</li>
+            <li>调整创作规则</li>
+            <li>手动编辑生成的内容</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h4>Q: 可以同时打开多个项目吗？</h4>
+          <p>A: 可以创建多个项目，但同一时间只能选择一个项目进行操作。</p>
+        </div>
+
+        <div class="card">
+          <h4>Q: 支持导出小说吗？</h4>
+          <p>A: 当前版本可手动复制内容，后续版本会添加一键导出功能（支持 TXT、EPUB 等格式）。</p>
+        </div>
+      </div>
+
+      <div class="section" id="tips">
+        <h2>✍️ 写作技巧</h2>
+        
+        <h3>提高生成质量的建议</h3>
+        
+        <div class="card">
+          <h4>1. 详细的大纲</h4>
+          <ul>
+            <li>每章大纲至少 100 字</li>
+            <li>包含情节的起承转合</li>
+            <li>明确章节目标</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4>2. 丰富的设定</h4>
+          <ul>
+            <li>主要角色要有详细简介</li>
+            <li>力量体系要清晰</li>
+            <li>地理环境要具体</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4>3. 明确的规则</h4>
+          <ul>
+            <li>在「创作规则」中详细说明</li>
+            <li>可以指定文风</li>
+            <li>可以禁止某些内容</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4>4. 逐章生成</h4>
+          <ul>
+            <li>不要一次性生成太多</li>
+            <li>每章完成后检查</li>
+            <li>根据需要调整后续大纲</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h4>5. 手动润色</h4>
+          <ul>
+            <li>AI 生成后建议手动修改</li>
+            <li>调整不符合预期的部分</li>
+            <li>保持个人风格</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>🛟 技术支持</h2>
+        <p>如有问题，请检查：</p>
+        <ol>
+          <li>Node.js 版本是否为最新 LTS</li>
+          <li>依赖是否完整安装</li>
+          <li>项目文件夹路径是否正确</li>
+        </ol>
+        <div class="success">
+          <strong>祝创作愉快！🎉</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>📖 小说创作大师 - AI 智能写作软件</p>
+      <p style="margin-top: 8px; font-size: 12px;">客服2742938881 ❤️</p>
+    </div>
+  </div>
+
+  <button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+</body>
+</html>

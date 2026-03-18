@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小说创作大师 - 浏览器版</title>
+  <script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/vue-router@4.2.5/dist/vue-router.global.prod.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus@2.5.6/dist/index.css">
+  <script src="https://unpkg.com/element-plus@2.5.6/dist/index.full.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@element-plus/icons-vue@2.3.1/dist/index.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #app { height: 100%; }
+    .app-container { height: 100vh; display: flex; overflow: hidden; }
+    .sidebar { width: 220px; background: #1f2937; display: flex; flex-direction: column; border-right: 1px solid #374151; }
+    .logo { display: flex; align-items: center; gap: 12px; padding: 24px 20px; color: white; font-size: 18px; font-weight: bold; border-bottom: 1px solid #374151; }
+    .main-container { flex: 1; display: flex; flex-direction: column; background: #f9fafb; }
+    .header { display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid #e5e7eb; padding: 0 24px; height: 64px; }
+    .header h2 { margin: 0; font-size: 20px; color: #111827; }
+    .main-content { flex: 1; overflow: auto; padding: 24px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; }
+    .empty-center { display: flex; align-items: center; justify-content: center; height: 300px; }
+    .chapter-item { padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 16px; background: #fafafa; }
+    .character-card, .setting-item { padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
+    .char-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .char-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; }
+    .log-item { display: flex; gap: 12px; padding: 12px; border-radius: 8px; background: #f9fafb; margin-bottom: 8px; }
+    .log-item.success { background: #f0fdf4; border-left: 3px solid #10b981; }
+    .log-item.error { background: #fef2f2; border-left: 3px solid #ef4444; }
+    .log-item.info { background: #eff6ff; border-left: 3px solid #3b82f6; }
+    .version-badge { position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; z-index: 9999; }
+    .contact-item { display: flex; align-items: center; gap: 24px; padding: 20px; }
+    .contact-info { flex: 1; }
+    .contact-info h3 { margin: 0 0 12px 0; color: #1f2937; font-size: 18px; }
+    .contact-value { margin: 0 0 12px 0; color: #3b82f6; font-size: 20px; font-weight: 500; cursor: pointer; user-select: all; }
+    .contact-value:hover { text-decoration: underline; }
+    .contact-divider { height: 1px; background-color: #e5e7eb; margin: 0 20px; }
+    .api-view { max-width: 800px; margin: 0 auto; }
+    .api-card { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+    .api-instructions h4 { color: #1f2937; margin-bottom: 12px; }
+    .api-instructions p { color: #4b5563; margin: 8px 0; line-height: 1.6; }
+    .api-instructions ul { color: #4b5563; margin: 8px 0; padding-left: 20px; }
+    .api-instructions li { margin: 8px 0; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="logo">
+          <svg style="width:32px;height:32px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span>小说创作大师</span>
+        </div>
+        <el-menu
+          :default-active="activeMenu"
+          @select="handleMenuSelect"
+          background-color="#1f2937"
+          text-color="#9ca3af"
+          active-text-color="#3b82f6"
+        >
+          <el-menu-item index="project">
+            <template #title><span>📁 项目管理</span></template>
+          </el-menu-item>
+          <el-menu-item index="outline">
+            <template #title><span>📝 章节大纲</span></template>
+          </el-menu-item>
+          <el-menu-item index="generate">
+            <template #title><span>✍️ 小说生成</span></template>
+          </el-menu-item>
+          <el-menu-item index="settings">
+            <template #title><span>⚙️ 设定管理</span></template>
+          </el-menu-item>
+          <el-menu-item index="progress">
+            <template #title><span>📊 生成进度</span></template>
+          </el-menu-item>
+          <el-menu-item index="api">
+            <template #title><span>🔑 API接口</span></template>
+          </el-menu-item>
+          <el-menu-item index="contact">
+            <template #title><span>📞 联系我们</span></template>
+          </el-menu-item>
+        </el-menu>
+        <div v-if="currentProject" style="padding:16px 20px;border-top:1px solid #374151;color:#9ca3af;">
+          <div style="color:white;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ currentProject.name }}</div>
+          <div style="font-size:12px;margin-top:4px;">{{ (currentProject.chapters || []).length }} 章</div>
+        </div>
+      </div>
+
+      <div class="main-container">
+        <div class="header">
+          <h2>{{ pageTitle }}</h2>
+          <div>
+            <el-button v-if="currentProject" @click="exportProject" type="primary">
+              <span>📥 导出数据</span>
+            </el-button>
+            <el-button @click="importData" type="success">
+              <span>📤 导入数据</span>
+            </el-button>
+          </div>
+        </div>
+        <div class="main-content">
+          <template v-if="currentView === 'project'">
+            <el-row :gutter="20">
+              <el-col :span="16">
+                <el-card>
+                  <template #header>
+                    <div class="card-header">
+                      <span>我的项目</span>
+                      <el-button type="primary" @click="showCreateDialog = true">
+                        <span>➕ 新建项目</span>
+                      </el-button>
+                    </div>
+                  </template>
+                  <div v-if="projects.length === 0" class="empty-center">
+                    <el-empty description="暂无项目，点击上方按钮创建">
+                      <el-button type="primary" @click="showCreateDialog = true">创建项目</el-button>
+                    </el-empty>
+                  </div>
+                  <el-row :gutter="20" v-else>
+                    <el-col :span="12" v-for="project in projects" :key="project.id">
+                      <el-card 
+                        class="project-card" 
+                        shadow="hover"
+                        @click="selectProject(project)"
+                        :style="{ cursor:'pointer', border: currentProject?.id === project.id ? '2px solid #3b82f6' : '1px solid #e5e7eb' }"
+                      >
+                        <div style="display:flex;gap:16px;align-items:center;">
+                          <div style="color:#3b82f6;font-size:40px;">📖</div>
+                          <div style="flex:1;">
+                            <h3 style="margin:0 0 8px 0;font-size:16px;">{{ project.name }}</h3>
+                            <p style="margin:0 0 8px 0;color:#6b7280;font-size:14px;">{{ project.description || '暂无描述' }}</p>
+                            <div style="font-size:12px;color:#9ca3af;">
+                              {{ (project.chapters || []).length }} 章 · {{ formatDate(project.createdAt) }}
+                            </div>
+                          </div>
+                        </div>
+                        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+                          <el-button size="small" @click.stop="editProject(project)">编辑</el-button>
+                          <el-button size="small" type="danger" @click.stop="deleteProject(project)">删除</el-button>
+                        </div>
+                      </el-card>
+                    </el-col>
+                  </el-row>
+                </el-card>
+              </el-col>
+              <el-col :span="8">
+                <el-card>
+                  <template #header><span>快速入门</span></template>
+                  <el-steps direction="vertical" :active="3">
+                    <el-step title="创建项目" description="配置作者角色和创作规则" />
+                    <el-step title="生成大纲" description="输入创意，生成章节大纲" />
+                    <el-step title="创作内容" description="基于大纲生成小说正文" />
+                    <el-step title="导出发布" description="保存或导出你的小说" />
+                  </el-steps>
+                </el-card>
+                <el-card style="margin-top:20px;">
+                  <template #header><span>使用提示</span></template>
+                  <ul style="margin:0;padding-left:20px;color:#6b7280;line-height:2.2;">
+                    <li>数据保存在浏览器本地存储中</li>
+                    <li>建议定期使用「导出数据」备份</li>
+                    <li>详细的设定能提升生成质量</li>
+                    <li>逐章生成可更好控制情节</li>
+                  </ul>
+                </el-card>
+              </el-col>
+            </el-row>
+          </template>
+
+          <template v-else-if="currentView === 'outline'">
+            <el-alert v-if="!currentProject" type="warning" show-icon style="margin-bottom:20px;">请先在「项目管理」中选择或创建一个项目</el-alert>
+            <div v-else>
+              <el-row :gutter="20">
+                <el-col :span="10">
+                  <el-card>
+                    <template #header><span>生成章节大纲</span></template>
+                    <el-form :model="outlineForm" label-width="100px">
+                      <el-form-item label="故事创意">
+                        <el-input v-model="outlineForm.idea" type="textarea" :rows="6" placeholder="描述你的故事创意、主题、核心情节等..." />
+                      </el-form-item>
+                      <el-form-item label="章节数量">
+                        <el-input-number v-model="outlineForm.chapterCount" :min="1" :max="50" />
+                      </el-form-item>
+                      <el-form-item label="风格类型">
+                        <el-select v-model="outlineForm.genre" placeholder="选择风格">
+                          <el-option label="玄幻" value="玄幻" />
+                          <el-option label="都市" value="都市" />
+                          <el-option label="仙侠" value="仙侠" />
+                          <el-option label="言情" value="言情" />
+                          <el-option label="悬疑" value="悬疑" />
+                          <el-option label="科幻" value="科幻" />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item>
+                        <el-button type="primary" @click="generateOutline" :loading="generating">
+                          <span>✨ 生成大纲</span>
+                        </el-button>
+                        <el-button @click="generateNextChapter" :disabled="chapters.length === 0">续写一章</el-button>
+                      </el-form-item>
+                    </el-form>
+                    <el-divider />
+                    <div>
+                      <h4 style="margin-bottom:12px;">提示词预览</h4>
+                      <el-input type="textarea" :rows="8" :model-value="buildOutlinePrompt()" readonly />
+                    </div>
+                  </el-card>
+                </el-col>
+                <el-col :span="14">
+                  <el-card>
+                    <template #header>
+                      <div class="card-header">
+                        <span>章节大纲列表 ({{ chapters.length }}章)</span>
+                        <el-button size="small" @click="saveAllChapters" :disabled="chapters.length === 0">💾 保存全部</el-button>
+                      </div>
+                    </template>
+                    <div v-if="chapters.length === 0" class="empty-center">
+                      <el-empty description="尚未生成章节大纲" />
+                    </div>
+                    <div v-else style="max-height:70vh;overflow-y:auto;">
+                      <div v-for="(chapter, index) in chapters" :key="index" class="chapter-item">
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                          <span style="font-weight:bold;color:#3b82f6;">第{{ chapter.number }}章</span>
+                          <el-input v-model="chapter.title" size="small" placeholder="章节标题" style="flex:1;margin:0 12px;" />
+                          <div style="display:flex;gap:8px;">
+                            <el-button size="small" @click="editChapter = { ...chapter }; showChapterEdit = true;">编辑</el-button>
+                            <el-button size="small" type="primary" @click="saveChapter(index)">保存</el-button>
+                            <el-button size="small" type="danger" @click="removeChapter(index)">删除</el-button>
+                          </div>
+                        </div>
+                        <el-input v-model="chapter.outline" type="textarea" :rows="4" placeholder="章节大纲内容..." />
+                      </div>
+                    </div>
+                  </el-card>
+                </el-col>
+              </el-row>
+            </div>
+          </template>
+
+          <template v-else-if="currentView === 'generate'">
+            <el-alert v-if="!currentProject" type="warning" show-icon style="margin-bottom:20px;">请先在「项目管理」中选择或创建一个项目</el-alert>
+            <div v-else>
+              <el-row :gutter="20">
+                <el-col :span="6">
+                  <el-card>
+                    <template #header><span>章节列表</span></template>
+                    <div v-if="!projectChapters.length" class="empty-center">
+                      <el-empty description="暂无章节" />
+                    </div>
+                    <div v-else style="max-height:75vh;overflow-y:auto;">
+                      <div 
+                        v-for="chapter in projectChapters" 
+                        :key="chapter.id"
+                        @click="selectedChapter = chapter"
+                        style="padding:12px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:8px;cursor:pointer;"
+                        :style="{ background: selectedChapter?.id === chapter.id ? '#eff6ff' : '#fafafa', borderColor: selectedChapter?.id === chapter.id ? '#3b82f6' : '#e5e7eb' }"
+                      >
+                        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;">
+                          <span style="font-weight:bold;color:#374151;font-size:13px;">第{{ chapter.number }}章</span>
+                          <span style="font-size:14px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ chapter.title }}</span>
+                        </div>
+                        <el-tag :type="chapter.status === 'done' ? 'success' : chapter.status === 'generating' ? 'warning' : 'info'" size="small">
+                          {{ chapter.status === 'done' ? '已完成' : chapter.status === 'generating' ? '生成中' : '大纲完成' }}
+                        </el-tag>
+                      </div>
+                    </div>
+                  </el-card>
+                </el-col>
+                <el-col :span="18">
+                  <el-card v-if="selectedChapter">
+                    <template #header>
+                      <div class="card-header">
+                        <span>{{ selectedChapter.title }}</span>
+                        <div style="display:flex;gap:8px;">
+                          <el-button size="small" @click="copyPrompt">📋 复制提示词</el-button>
+                          <el-button size="small" type="primary" @click="generateContent" :loading="generatingContent">✨ 模拟生成</el-button>
+                          <el-button size="small" type="success" @click="saveChapterContent" :disabled="!selectedChapter.content">💾 保存</el-button>
+                        </div>
+                      </div>
+                    </template>
+                    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px;">
+                      <el-checkbox v-model="genOptions.useCharacters">使用角色状态</el-checkbox>
+                      <el-checkbox v-model="genOptions.useWorldSettings">引用世界设定</el-checkbox>
+                      <el-checkbox v-model="genOptions.usePreviousChapters">关联前面章节</el-checkbox>
+                      <el-checkbox v-model="genOptions.autoExpand">自动扩写</el-checkbox>
+                      <el-input-number v-model="genOptions.targetWords" :min="500" :max="20000" size="small" style="width:140px;" />
+                      <span style="color:#6b7280;">字</span>
+                    </div>
+                    <el-divider />
+                    <el-row :gutter="20">
+                      <el-col :span="12">
+                        <div style="font-weight:600;margin-bottom:12px;color:#374151;">章节大纲</div>
+                        <el-input v-model="selectedChapter.outline" type="textarea" :rows="10" readonly />
+                      </el-col>
+                      <el-col :span="12">
+                        <div style="font-weight:600;margin-bottom:12px;color:#374151;">正文内容 ({{ (selectedChapter.content || '').length }}字)</div>
+                        <el-input v-model="selectedChapter.content" type="textarea" :rows="10" placeholder="正文内容将在这里显示..." />
+                      </el-col>
+                    </el-row>
+                    <el-divider />
+                    <div style="font-weight:600;margin-bottom:12px;color:#374151;">AI 生成提示词</div>
+                    <el-input type="textarea" :rows="8" :model-value="buildGeneratePrompt()" readonly />
+                    <div v-if="stateUpdates.length" style="margin-top:20px;">
+                      <el-alert type="info" show-icon title="智能状态更新建议">
+                        <div v-for="(update, i) in stateUpdates" :key="i" style="padding:12px;background:#f0f9ff;border-radius:6px;margin-bottom:8px;">
+                          <span style="font-weight:500;">{{ update.type }}: {{ update.target }}</span>
+                          <p style="margin:8px 0;color:#6b7280;">{{ update.suggestion }}</p>
+                          <el-button size="small" type="primary" @click="stateUpdates.splice(i, 1)">应用</el-button>
+                        </div>
+                      </el-alert>
+                    </div>
+                  </el-card>
+                  <div v-else class="empty-center">
+                    <el-empty description="请从左侧选择一个章节" />
+                  </div>
+                </el-col>
+              </el-row>
+            </div>
+          </template>
+
+          <template v-else-if="currentView === 'settings'">
+            <el-alert v-if="!currentProject" type="warning" show-icon style="margin-bottom:20px;">请先在「项目管理」中选择或创建一个项目</el-alert>
+            <div v-else>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-card>
+                    <template #header>
+                      <div class="card-header">
+                        <span>角色管理</span>
+                        <el-button type="primary" size="small" @click="showCharDialog = true">➕ 添加角色</el-button>
+                      </div>
+                    </template>
+                    <div v-if="!characters.length" class="empty-center">
+                      <el-empty description="暂无角色" />
+                    </div>
+                    <div v-else style="max-height:65vh;overflow-y:auto;">
+                      <div v-for="char in characters" :key="char.id" class="character-card">
+                        <div class="char-header">
+                          <div class="char-avatar">{{ (char.name || '?')[0] }}</div>
+                          <div style="flex:1;">
+                            <h4 style="margin:0 0 4px 0;font-size:16px;">{{ char.name }}</h4>
+                            <el-tag size="small" type="info">{{ char.role || '角色' }}</el-tag>
+                          </div>
+                          <div style="display:flex;gap:8px;">
+                            <el-button size="small" @click="editingChar = { ...char }; showCharDialog = true;">编辑</el-button>
+                            <el-button size="small" type="danger" @click="deleteCharacter(char)">删除</el-button>
+                          </div>
+                        </div>
+                        <div style="padding:8px 12px;background:#fff;border-radius:6px;margin-bottom:8px;">
+                          <span style="color:#6b7280;font-size:13px;">当前状态：</span>
+                          <span>{{ char.status || '未设定' }}</span>
+                        </div>
+                        <div style="color:#6b7280;font-size:14px;line-height:1.6;">{{ char.description || '暂无简介' }}</div>
+                      </div>
+                    </div>
+                  </el-card>
+                </el-col>
+                <el-col :span="12">
+                  <el-card>
+                    <template #header>
+                      <div class="card-header">
+                        <span>世界设定</span>
+                        <el-button type="primary" size="small" @click="showSettingDialog = true">➕ 添加设定</el-button>
+                      </div>
+                    </template>
+                    <div v-if="!worldSettings.length" class="empty-center">
+                      <el-empty description="暂无设定" />
+                    </div>
+                    <div v-else style="max-height:65vh;overflow-y:auto;">
+                      <div v-for="setting in worldSettings" :key="setting.id" class="setting-item">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                          <h4 style="margin:0;font-size:16px;">{{ setting.name }}</h4>
+                          <div style="display:flex;gap:8px;">
+                            <el-button size="small" @click="editingSetting = { ...setting }; showSettingDialog = true;">编辑</el-button>
+                            <el-button size="small" type="danger" @click="deleteSetting(setting)">删除</el-button>
+                          </div>
+                        </div>
+                        <p style="color:#374151;line-height:1.7;margin:8px 0;">{{ setting.content }}</p>
+                        <div style="display:flex;gap:12px;align-items:center;">
+                          <el-tag size="small" type="success">{{ setting.category || '通用' }}</el-tag>
+                          <span style="font-size:12px;color:#9ca3af;">{{ formatDate(setting.createdAt) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </el-card>
+                </el-col>
+              </el-row>
+            </div>
+          </template>
+
+          <template v-else-if="currentView === 'progress'">
+            <el-alert v-if="!currentProject" type="warning" show-icon style="margin-bottom:20px;">请先在「项目管理」中选择或创建一个项目</el-alert>
+            <div v-else>
+              <el-row :gutter="20">
+                <el-col :span="8">
+                  <el-card>
+                    <template #header><span>项目统计</span></template>
+                    <el-statistic title="总章节数" :value="projectChapters.length" />
+                    <el-divider />
+                    <el-statistic title="已完成" :value="projectChapters.filter(c => c.status === 'done').length" />
+                    <el-divider />
+                    <el-statistic title="总字数" :value="projectChapters.reduce((sum, c) => sum + (c.wordCount || 0), 0)" />
+                    <el-divider />
+                    <el-statistic title="平均章节" :value="projectChapters.filter(c => c.wordCount > 0).length ? Math.round(projectChapters.reduce((sum, c) => sum + (c.wordCount || 0), 0) / projectChapters.filter(c => c.wordCount > 0).length) : 0" suffix="字" />
+                  </el-card>
+                </el-col>
+                <el-col :span="8">
+                  <el-card>
+                    <template #header><span>生成进度</span></template>
+                    <el-progress 
+                      :percentage="projectChapters.length ? Math.round((projectChapters.filter(c => c.status === 'done').length / projectChapters.length) * 100) : 0" 
+                      :stroke-width="20"
+                    />
+                    <div style="margin-top:20px;">
+                      <p style="color:#6b7280;margin-bottom:8px;">生成状态</p>
+                      <el-tag :type="projectChapters.some(c => c.status === 'generating') ? 'warning' : 'success'">
+                        {{ projectChapters.some(c => c.status === 'generating') ? '正在生成...' : '空闲' }}
+                      </el-tag>
+                    </div>
+                  </el-card>
+                </el-col>
+                <el-col :span="8">
+                  <el-card>
+                    <template #header><span>章节分布</span></template>
+                    <div style="display:flex;flex-direction:column;gap:16px;">
+                      <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:#6b7280;"></span>
+                        <span>大纲完成</span>
+                        <span style="margin-left:auto;font-weight:bold;font-size:18px;">{{ projectChapters.filter(c => c.status === 'outline').length }}</span>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></span>
+                        <span>生成中</span>
+                        <span style="margin-left:auto;font-weight:bold;font-size:18px;">{{ projectChapters.filter(c => c.status === 'generating').length }}</span>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="width:10px;height:10px;border-radius:50%;background:#10b981;"></span>
+                        <span>已完成</span>
+                        <span style="margin-left:auto;font-weight:bold;font-size:18px;">{{ projectChapters.filter(c => c.status === 'done').length }}</span>
+                      </div>
+                    </div>
+                  </el-card>
+                </el-col>
+              </el-row>
+              <el-row :gutter="20" style="margin-top:20px;">
+                <el-col :span="24">
+                  <el-card>
+                    <template #header>
+                      <div class="card-header">
+                        <span>操作日志</span>
+                        <el-button size="small" @click="logs = []">清空日志</el-button>
+                      </div>
+                    </template>
+                    <div v-if="!logs.length" class="empty-center">
+                      <el-empty description="暂无日志" />
+                    </div>
+                    <div v-else style="max-height:400px;overflow-y:auto;">
+                      <div v-for="log in logs" :key="log.id" :class="['log-item', log.type]">
+                        <div style="font-size:20px;margin-top:2px;">
+                          {{ log.type === 'success' ? '✅' : log.type === 'error' ? '❌' : 'ℹ️' }}
+                        </div>
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#374151;margin-bottom:4px;">{{ log.message }}</div>
+                          <div style="font-size:12px;color:#9ca3af;">{{ formatTime(log.timestamp) }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </el-card>
+                </el-col>
+              </el-row>
+            </div>
+          </template>
+
+          <template v-else-if="currentView === 'api'">
+            <div class="api-view">
+              <el-card class="api-card">
+                <template #header>
+                  <div class="card-header">
+                    <span>API 接口配置</span>
+                  </div>
+                </template>
+                
+                <el-form :model="apiConfig" label-width="120px">
+                  <el-form-item label="API 地址">
+                    <el-input v-model="apiConfig.baseUrl" placeholder="例如: https://api.deepseek.com" />
+                  </el-form-item>
+                  
+                  <el-form-item label="API 密钥">
+                    <el-input v-model="apiConfig.apiKey" type="password" show-password placeholder="请输入您的 API 密钥" />
+                  </el-form-item>
+                  
+                  <el-form-item label="模型名称">
+                    <el-select v-model="apiConfig.model" placeholder="请选择模型">
+                      <el-option label="deepseek-chat" value="deepseek-chat" />
+                      <el-option label="deepseek-coder" value="deepseek-coder" />
+                      <el-option label="gpt-4" value="gpt-4" />
+                      <el-option label="gpt-3.5-turbo" value="gpt-3.5-turbo" />
+                    </el-select>
+                  </el-form-item>
+                  
+                  <el-form-item label="温度参数">
+                    <el-slider v-model="apiConfig.temperature" :min="0" :max="2" :step="0.1" show-input />
+                  </el-form-item>
+                  
+                  <el-form-item label="最大Token数">
+                    <el-input-number v-model="apiConfig.maxTokens" :min="100" :max="128000" :step="100" />
+                  </el-form-item>
+                  
+                  <el-form-item>
+                    <el-button type="primary" @click="saveApiConfig">保存配置</el-button>
+                    <el-button @click="resetApiConfig">重置</el-button>
+                    <el-button @click="testApiConnection">测试连接</el-button>
+                  </el-form-item>
+                </el-form>
+              </el-card>
+              
+              <el-card class="api-card" style="margin-top: 24px;">
+                <template #header>
+                  <div class="card-header">
+                    <span>API 使用说明</span>
+                  </div>
+                </template>
+                
+                <div class="api-instructions">
+                  <h4>获取 API 密钥</h4>
+                  <p>1. 访问 DeepSeek 官网：https://platform.deepseek.com</p>
+                  <p>2. 注册并登录账号</p>
+                  <p>3. 在 API Keys 页面创建新的 API Key</p>
+                  <p>4. 复制 API Key 并填入上方配置中</p>
+                  
+                  <h4 style="margin-top: 24px;">参数说明</h4>
+                  <ul>
+                    <li><strong>温度参数</strong>：控制生成的随机性，值越高越随机（推荐 0.7-1.0）</li>
+                    <li><strong>最大Token数</strong>：单次生成的最大长度，根据需要调整</li>
+                  </ul>
+                </div>
+              </el-card>
+            </div>
+          </template>
+
+          <template v-else-if="currentView === 'contact'">
+            <div style="max-width:600px;margin:0 auto;">
+              <el-card>
+                <template #header>
+                  <div class="card-header">
+                    <span>联系我们</span>
+                  </div>
+                </template>
+                
+                <div>
+                  <div class="contact-item">
+                    <svg style="width:40px;height:40px;color:#3b82f6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <div class="contact-info">
+                      <h3>邮箱</h3>
+                      <p class="contact-value" @click="copyEmail">{{ contactEmail }}</p>
+                      <el-button type="primary" size="small" @click="copyEmail">
+                        <span>📋 复制邮箱</span>
+                      </el-button>
+                    </div>
+                  </div>
+                  
+                  <div class="contact-divider"></div>
+                  
+                  <div class="contact-item">
+                    <svg style="width:40px;height:40px;color:#07c160" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                    </svg>
+                    <div class="contact-info">
+                      <h3>微信</h3>
+                      <p class="contact-value" @click="copyWechat">{{ contactWechat }}</p>
+                      <el-button type="success" size="small" @click="copyWechat">
+                        <span>📋 复制微信号</span>
+                      </el-button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style="text-align:center;margin-top:24px;">
+                  <el-divider />
+                  <p style="color:#6b7280;font-size:14px;margin:0;">如果您在使用过程中有任何问题或建议，欢迎随时联系我们！</p>
+                </div>
+              </el-card>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <el-dialog v-model="showCreateDialog" title="创建新项目" width="600px">
+      <el-form :model="formData" label-width="100px">
+        <el-form-item label="项目名称">
+          <el-input v-model="formData.name" placeholder="给你的小说起个名字" />
+        </el-form-item>
+        <el-form-item label="项目描述">
+          <el-input v-model="formData.description" type="textarea" :rows="3" placeholder="简单描述一下你的故事" />
+        </el-form-item>
+        <el-form-item label="作者角色">
+          <el-input v-model="formData.authorRole" type="textarea" :rows="2" />
+        </el-form-item>
+        <el-form-item label="创作规则">
+          <el-input v-model="formData.writingRules" type="textarea" :rows="2" />
+        </el-form-item>
+        <el-form-item label="目标字数">
+          <el-input-number v-model="formData.targetWordCount" :min="500" :max="10000" :step="100" />
+          <span style="margin-left:10px;color:#999;">字/章</span>
+        </el-form-item>
+        <el-form-item label="发布平台">
+          <el-select v-model="formData.platform">
+            <el-option label="番茄小说" value="番茄" />
+            <el-option label="七猫小说" value="七猫" />
+            <el-option label="知乎" value="知乎" />
+            <el-option label="通用" value="通用" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showCreateDialog = false">取消</el-button>
+        <el-button type="primary" @click="createProject">创建</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="showEditDialog" title="编辑项目" width="600px">
+      <el-form :model="editFormData" label-width="100px">
+        <el-form-item label="项目名称">
+          <el-input v-model="editFormData.name" />
+        </el-form-item>
+        <el-form-item label="项目描述">
+          <el-input v-model="editFormData.description" type="textarea" :rows="3" />
+        </el-form-item>
+        <el-form-item label="作者角色">
+          <el-input v-model="editFormData.authorRole" type="textarea" :rows="2" />
+        </el-form-item>
+        <el-form-item label="创作规则">
+          <el-input v-model="editFormData.writingRules" type="textarea" :rows="2" />
+        </el-form-item>
+        <el-form-item label="目标字数">
+          <el-input-number v-model="editFormData.targetWordCount" :min="500" :max="10000" :step="100" />
+        </el-form-item>
+        <el-form-item label="发布平台">
+          <el-select v-model="editFormData.platform">
+            <el-option label="番茄小说" value="番茄" />
+            <el-option label="七猫小说" value="七猫" />
+            <el-option label="知乎" value="知乎" />
+            <el-option label="通用" value="通用" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showEditDialog = false">取消</el-button>
+        <el-button type="primary" @click="saveProjectEdit">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="showChapterEdit" title="编辑章节" width="700px">
+      <el-form label-width="100px">
+        <el-form-item label="章节标题">
+          <el-input v-model="editChapter.title" />
+        </el-form-item>
+        <el-form-item label="章节大纲">
+          <el-input v-model="editChapter.outline" type="textarea" :rows="10" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showChapterEdit = false">取消</el-button>
+        <el-button type="primary" @click="confirmChapterEdit">确认</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="showCharDialog" :title="editingChar ? '编辑角色' : '添加角色'" width="500px">
+      <el-form :model="charForm" label-width="100px">
+        <el-form-item label="角色名称">
+          <el-input v-model="charForm.name" placeholder="输入角色名" />
+        </el-form-item>
+        <el-form-item label="角色定位">
+          <el-select v-model="charForm.role">
+            <el-option label="主角" value="主角" />
+            <el-option label="配角" value="配角" />
+            <el-option label="反派" value="反派" />
+            <el-option label="其他" value="其他" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="当前状态">
+          <el-input v-model="charForm.status" placeholder="描述角色当前状态" />
+        </el-form-item>
+        <el-form-item label="角色简介">
+          <el-input v-model="charForm.description" type="textarea" :rows="4" placeholder="详细描述角色的性格、外貌、背景等" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showCharDialog = false">取消</el-button>
+        <el-button type="primary" @click="saveCharacter">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="showSettingDialog" :title="editingSetting ? '编辑设定' : '添加设定'" width="500px">
+      <el-form :model="settingForm" label-width="100px">
+        <el-form-item label="设定名称">
+          <el-input v-model="settingForm.name" placeholder="例如：修炼体系、地理环境" />
+        </el-form-item>
+        <el-form-item label="设定分类">
+          <el-select v-model="settingForm.category">
+            <el-option label="世界观" value="世界观" />
+            <el-option label="力量体系" value="力量体系" />
+            <el-option label="地理环境" value="地理环境" />
+            <el-option label="势力组织" value="势力组织" />
+            <el-option label="其他" value="其他" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="设定内容">
+          <el-input v-model="settingForm.content" type="textarea" :rows="6" placeholder="详细描述该设定" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showSettingDialog = false">取消</el-button>
+        <el-button type="primary" @click="saveSetting">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <div class="version-badge">🌐 浏览器版本 - 数据存储在本地</div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, watch, onMounted } = Vue
+
+    const app = createApp({
+      setup() {
+        const currentView = ref('project')
+        const activeMenu = ref('project')
+        
+        const projects = ref([])
+        const currentProject = ref(null)
+        const chapters = ref([])
+        const logs = ref([])
+        
+        const showCreateDialog = ref(false)
+        const showEditDialog = ref(false)
+        const showChapterEdit = ref(false)
+        const showCharDialog = ref(false)
+        const showSettingDialog = ref(false)
+        
+        const editingProject = ref(null)
+        const editChapter = ref({})
+        const editingChar = ref(null)
+        const editingSetting = ref(null)
+        const selectedChapter = ref(null)
+        
+        const generating = ref(false)
+        const generatingContent = ref(false)
+        const stateUpdates = ref([])
+
+        const formData = ref({
+          name: '',
+          description: '',
+          authorRole: '你是一位资深的网络小说作家，擅长创作引人入胜的故事，文笔流畅，情节紧凑。',
+          writingRules: '1. 语言口语化，符合网络小说风格\n2. 每章设置悬念，吸引读者继续阅读\n3. 人物形象鲜明，性格突出\n4. 节奏适中，张弛有度',
+          targetWordCount: 2000,
+          platform: '番茄'
+        })
+
+        const editFormData = ref({})
+        const outlineForm = ref({ idea: '', chapterCount: 10, genre: '玄幻' })
+        const charForm = ref({ name: '', role: '主角', status: '', description: '' })
+        const settingForm = ref({ name: '', category: '世界观', content: '' })
+        const genOptions = ref({
+          useCharacters: true,
+          useWorldSettings: true,
+          usePreviousChapters: true,
+          autoExpand: true,
+          targetWords: 2000
+        })
+
+        const pageTitle = computed(() => {
+          const titles = {
+            project: '项目管理',
+            outline: '章节大纲生成',
+            generate: '小说内容生成',
+            settings: '角色与世界设定',
+            progress: '生成进度监控',
+            api: 'API 接口配置',
+            contact: '联系我们'
+          }
+          return titles[currentView.value] || '小说创作大师'
+        })
+        
+        const apiConfig = ref({
+          baseUrl: 'https://api.deepseek.com',
+          apiKey: '',
+          model: 'deepseek-chat',
+          temperature: 0.7,
+          maxTokens: 4000
+        })
+
+        const contactEmail = ref('2742938881@qq.com')
+        const contactWechat = ref('2742938881')
+
+        const saveApiConfig = () => {
+          saveToLocalStorage()
+          ElementPlus.ElMessage.success('配置已保存')
+        }
+
+        const resetApiConfig = () => {
+          apiConfig.value = {
+            baseUrl: 'https://api.deepseek.com',
+            apiKey: '',
+            model: 'deepseek-chat',
+            temperature: 0.7,
+            maxTokens: 4000
+          }
+          ElementPlus.ElMessage.info('配置已重置')
+        }
+
+        const testApiConnection = () => {
+          ElementPlus.ElMessage.info('测试连接功能（浏览器版暂不支持实际API调用）')
+        }
+
+        const copyEmail = async () => {
+          try {
+            await navigator.clipboard.writeText(contactEmail.value)
+            ElementPlus.ElMessage.success('邮箱已复制到剪贴板')
+          } catch (error) {
+            ElementPlus.ElMessage.error('复制失败，请手动复制')
+          }
+        }
+
+        const copyWechat = async () => {
+          try {
+            await navigator.clipboard.writeText(contactWechat.value)
+            ElementPlus.ElMessage.success('微信号已复制到剪贴板')
+          } catch (error) {
+            ElementPlus.ElMessage.error('复制失败，请手动复制')
+          }
+        }
+
+        const projectChapters = computed(() => currentProject.value?.chapters || [])
+        const characters = computed(() => currentProject.value?.characters || [])
+        const worldSettings = computed(() => currentProject.value?.worldSettings || [])
+
+        const saveToLocalStorage = () => {
+          localStorage.setItem('novel-creator-data', JSON.stringify({
+            projects: projects.value,
+            currentProjectId: currentProject.value?.id || null,
+            apiConfig: apiConfig.value
+          }))
+        }
+
+        const loadFromLocalStorage = () => {
+          const data = localStorage.getItem('novel-creator-data')
+          if (data) {
+            const parsed = JSON.parse(data)
+            projects.value = parsed.projects || []
+            if (parsed.currentProjectId) {
+              currentProject.value = projects.value.find(p => p.id === parsed.currentProjectId) || null
+            }
+            if (parsed.apiConfig) {
+              apiConfig.value = parsed.apiConfig
+            }
+          }
+        }
+
+        const addLog = (log) => {
+          const newLog = {
+            id: Date.now().toString(),
+            ...log,
+            timestamp: new Date().toISOString()
+          }
+          logs.value.unshift(newLog)
+          if (logs.value.length > 100) logs.value = logs.value.slice(0, 100)
+        }
+
+        const handleMenuSelect = (index) => {
+          currentView.value = index
+          activeMenu.value = index
+          if (index === 'outline' && currentProject.value) {
+            chapters.value = (currentProject.value.chapters || []).map(c => ({
+              number: c.number,
+              title: c.title,
+              outline: c.outline
+            }))
+          }
+        }
+
+        const createProject = () => {
+          if (!formData.value.name) {
+            ElementPlus.ElMessage.warning('请输入项目名称')
+            return
+          }
+          const project = {
+            id: Date.now().toString(),
+            name: formData.value.name,
+            description: formData.value.description,
+            createdAt: new Date().toISOString(),
+            config: {
+              authorRole: formData.value.authorRole,
+              writingRules: formData.value.writingRules,
+              targetWordCount: formData.value.targetWordCount,
+              platform: formData.value.platform
+            },
+            chapters: [],
+            characters: [],
+            worldSettings: []
+          }
+          projects.value.push(project)
+          currentProject.value = project
+          showCreateDialog.value = false
+          saveToLocalStorage()
+          addLog({ type: 'success', message: `项目「${project.name}」创建成功` })
+          ElementPlus.ElMessage.success('项目创建成功')
+          formData.value = {
+            name: '', description: '',
+            authorRole: '你是一位资深的网络小说作家，擅长创作引人入胜的故事，文笔流畅，情节紧凑。',
+            writingRules: '1. 语言口语化，符合网络小说风格\n2. 每章设置悬念，吸引读者继续阅读\n3. 人物形象鲜明，性格突出\n4. 节奏适中，张弛有度',
+            targetWordCount: 2000, platform: '番茄'
+          }
+        }
+
+        const selectProject = (project) => {
+          currentProject.value = project
+          chapters.value = (project.chapters || []).map(c => ({
+            number: c.number,
+            title: c.title,
+            outline: c.outline
+          }))
+          saveToLocalStorage()
+          ElementPlus.ElMessage.success(`已选择项目：${project.name}`)
+        }
+
+        const editProject = (project) => {
+          editingProject.value = project
+          editFormData.value = {
+            name: project.name,
+            description: project.description,
+            authorRole: project.config?.authorRole,
+            writingRules: project.config?.writingRules,
+            targetWordCount: project.config?.targetWordCount,
+            platform: project.config?.platform
+          }
+          showEditDialog.value = true
+        }
+
+        const saveProjectEdit = () => {
+          if (!editFormData.value.name) {
+            ElementPlus.ElMessage.warning('请输入项目名称')
+            return
+          }
+          const project = projects.value.find(p => p.id === editingProject.value.id)
+          if (project) {
+            project.name = editFormData.value.name
+            project.description = editFormData.value.description
+            project.config = {
+              ...project.config,
+              authorRole: editFormData.value.authorRole,
+              writingRules: editFormData.value.writingRules,
+              targetWordCount: editFormData.value.targetWordCount,
+              platform: editFormData.value.platform
+            }
+            if (currentProject.value?.id === project.id) {
+              currentProject.value = { ...project }
+            }
+            saveToLocalStorage()
+            addLog({ type: 'info', message: `项目「${project.name}」已更新` })
+            ElementPlus.ElMessage.success('项目更新成功')
+          }
+          showEditDialog.value = false
+        }
+
+        const deleteProject = async (project) => {
+          try {
+            await ElementPlus.ElMessageBox.confirm(`确定要删除项目「${project.name}」吗？此操作不可恢复。`, '确认删除', { type: 'warning' })
+            const index = projects.value.findIndex(p => p.id === project.id)
+            if (index > -1) {
+              projects.value.splice(index, 1)
+              if (currentProject.value?.id === project.id) {
+                currentProject.value = null
+              }
+              saveToLocalStorage()
+              addLog({ type: 'warning', message: `项目「${project.name}」已删除` })
+              ElementPlus.ElMessage.success('项目已删除')
+            }
+          } catch {}
+        }
+
+        const buildOutlinePrompt = () => {
+          if (!currentProject.value) return ''
+          const config = currentProject.value.config || {}
+          return `${config.authorRole || ''}\n\n请根据以下信息创作小说章节大纲：\n\n【故事创意】\n${outlineForm.value.idea || '（待补充）'}\n\n【风格类型】${outlineForm.value.genre}\n【章节数量】${outlineForm.value.chapterCount}章\n\n【创作规则】\n${config.writingRules || ''}`
+        }
+
+        const generateOutline = async () => {
+          if (!currentProject.value) {
+            ElementPlus.ElMessage.warning('请先选择一个项目')
+            return
+          }
+          if (!outlineForm.value.idea) {
+            ElementPlus.ElMessage.warning('请输入故事创意')
+            return
+          }
+          generating.value = true
+          addLog({ type: 'info', message: '开始生成章节大纲...' })
+          await new Promise(resolve => setTimeout(resolve, 1500))
+          const sampleChapters = []
+          for (let i = 1; i <= outlineForm.value.chapterCount; i++) {
+            sampleChapters.push({
+              number: i,
+              title: `第${i}章 示例标题`,
+              outline: `这是第${i}章的大纲内容。在这里描述本章的主要情节发展、人物出场、关键事件等。`
+            })
+          }
+          chapters.value = sampleChapters
+          addLog({ type: 'success', message: `成功生成${sampleChapters.length}章大纲` })
+          ElementPlus.ElMessage.success('大纲生成成功！请编辑和保存。')
+          generating.value = false
+        }
+
+        const generateNextChapter = async () => {
+          if (!currentProject.value) return
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          const nextNum = chapters.value.length + 1
+          chapters.value.push({
+            number: nextNum,
+            title: `第${nextNum}章 续写章节`,
+            outline: '这是续写章节的大纲内容。'
+          })
+          addLog({ type: 'info', message: '续写了新章节' })
+          ElementPlus.ElMessage.success('续写成功')
+        }
+
+        const confirmChapterEdit = () => {
+          const index = chapters.value.findIndex(c => c.number === editChapter.value.number)
+          if (index > -1) {
+            chapters.value[index] = { ...editChapter.value }
+          }
+          showChapterEdit.value = false
+        }
+
+        const removeChapter = (index) => {
+          chapters.value.splice(index, 1)
+          chapters.value.forEach((c, i) => { c.number = i + 1 })
+        }
+
+        const saveChapter = (index) => {
+          if (!currentProject.value) return
+          const chapter = chapters.value[index]
+          const existing = currentProject.value.chapters.find(c => c.number === chapter.number)
+          if (existing) {
+            existing.title = chapter.title
+            existing.outline = chapter.outline
+          } else {
+            currentProject.value.chapters.push({
+              id: Date.now().toString(),
+              number: chapter.number,
+              title: chapter.title,
+              outline: chapter.outline,
+              content: '',
+              wordCount: 0,
+              status: 'outline',
+              createdAt: new Date().toISOString()
+            })
+          }
+          saveToLocalStorage()
+          addLog({ type: 'success', message: `第${chapter.number}章已保存` })
+          ElementPlus.ElMessage.success('保存成功')
+        }
+
+        const saveAllChapters = () => {
+          if (!currentProject.value) return
+          chapters.value.forEach(chapter => {
+            const existing = currentProject.value.chapters.find(c => c.number === chapter.number)
+            if (existing) {
+              existing.title = chapter.title
+              existing.outline = chapter.outline
+            } else {
+              currentProject.value.chapters.push({
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                number: chapter.number,
+                title: chapter.title,
+                outline: chapter.outline,
+                content: '',
+                wordCount: 0,
+                status: 'outline',
+                createdAt: new Date().toISOString()
+              })
+            }
+          })
+          saveToLocalStorage()
+          addLog({ type: 'success', message: `已保存${chapters.value.length}章` })
+          ElementPlus.ElMessage.success('全部保存成功')
+        }
+
+        const buildGeneratePrompt = () => {
+          if (!currentProject.value || !selectedChapter.value) return ''
+          const config = currentProject.value.config || {}
+          let prompt = `${config.authorRole || ''}\n\n【章节信息】\n第${selectedChapter.value.number}章：${selectedChapter.value.title}\n\n【章节大纲】\n${selectedChapter.value.outline}\n\n`
+          if (genOptions.value.useCharacters && characters.value.length > 0) {
+            prompt += `【角色状态】\n`
+            characters.value.forEach(char => {
+              prompt += `- ${char.name}: ${char.status || '无状态记录'}\n`
+              if (char.description) prompt += `  简介: ${char.description}\n`
+            })
+            prompt += '\n'
+          }
+          if (genOptions.value.useWorldSettings && worldSettings.value.length > 0) {
+            prompt += `【世界设定】\n`
+            worldSettings.value.forEach(setting => {
+              prompt += `- ${setting.name}: ${setting.content}\n`
+            })
+            prompt += '\n'
+          }
+          if (genOptions.value.usePreviousChapters) {
+            const prevChapters = projectChapters.value.filter(c => c.number < selectedChapter.value.number && c.content)
+            if (prevChapters.length > 0) {
+              prompt += `【前情提要】\n`
+              prevChapters.slice(-3).forEach(c => {
+                prompt += `第${c.number}章概要: ${(c.outline || '').substring(0, 100)}...\n`
+              })
+              prompt += '\n'
+            }
+          }
+          prompt += `【创作规则】\n${config.writingRules || ''}\n\n【目标字数】约${genOptions.value.targetWords}字`
+          return prompt
+        }
+
+        const generateContent = async () => {
+          if (!currentProject.value || !selectedChapter.value) {
+            ElementPlus.ElMessage.warning('请先选择章节')
+            return
+          }
+          generatingContent.value = true
+          addLog({ type: 'info', message: `开始生成第${selectedChapter.value.number}章内容...` })
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          const sampleContent = `这是第${selectedChapter.value.number}章的正文内容示例。\n\n在这里，故事将按照大纲逐步展开。人物依次登场，情节逐渐推进。\n\n"你来了。"某人说道。\n\n"是的，我来了。"主角回答。\n\n对话继续，情节发展...\n\n（本章结束，未完待续）`
+          selectedChapter.value.content = sampleContent
+          selectedChapter.value.wordCount = sampleContent.length
+          selectedChapter.value.status = 'done'
+          stateUpdates.value = [
+            { type: '角色状态', target: '主角', suggestion: '建议更新主角状态' },
+            { type: '世界设定', target: '秘境规则', suggestion: '建议补充设定' }
+          ]
+          saveToLocalStorage()
+          addLog({ type: 'success', message: `第${selectedChapter.value.number}章生成完成，${sampleContent.length}字` })
+          ElementPlus.ElMessage.success('生成成功！')
+          generatingContent.value = false
+        }
+
+        const copyPrompt = async () => {
+          const prompt = buildGeneratePrompt()
+          await navigator.clipboard.writeText(prompt)
+          ElementPlus.ElMessage.success('提示词已复制到剪贴板')
+        }
+
+        const saveChapterContent = () => {
+          if (!selectedChapter.value) return
+          selectedChapter.value.wordCount = (selectedChapter.value.content || '').length
+          saveToLocalStorage()
+          addLog({ type: 'success', message: `第${selectedChapter.value.number}章已保存` })
+          ElementPlus.ElMessage.success('保存成功')
+        }
+
+        const saveCharacter = () => {
+          if (!charForm.value.name) {
+            ElementPlus.ElMessage.warning('请输入角色名称')
+            return
+          }
+          if (editingChar.value) {
+            const char = characters.value.find(c => c.id === editingChar.value.id)
+            if (char) {
+              Object.assign(char, charForm.value)
+            }
+            addLog({ type: 'info', message: `角色「${charForm.value.name}」已更新` })
+            ElementPlus.ElMessage.success('角色已更新')
+          } else {
+            currentProject.value.characters.push({
+              id: Date.now().toString(),
+              ...charForm.value,
+              createdAt: new Date().toISOString()
+            })
+            addLog({ type: 'success', message: `角色「${charForm.value.name}」已添加` })
+            ElementPlus.ElMessage.success('角色已添加')
+          }
+          saveToLocalStorage()
+          showCharDialog.value = false
+          charForm.value = { name: '', role: '主角', status: '', description: '' }
+          editingChar.value = null
+        }
+
+        const deleteCharacter = async (char) => {
+          try {
+            await ElementPlus.ElMessageBox.confirm(`确定要删除角色「${char.name}」吗？`, '确认删除', { type: 'warning' })
+            const index = characters.value.findIndex(c => c.id === char.id)
+            if (index > -1) {
+              currentProject.value.characters.splice(index, 1)
+              saveToLocalStorage()
+              addLog({ type: 'warning', message: `角色「${char.name}」已删除` })
+              ElementPlus.ElMessage.success('已删除')
+            }
+          } catch {}
+        }
+
+        const saveSetting = () => {
+          if (!settingForm.value.name || !settingForm.value.content) {
+            ElementPlus.ElMessage.warning('请填写完整信息')
+            return
+          }
+          if (editingSetting.value) {
+            const setting = worldSettings.value.find(s => s.id === editingSetting.value.id)
+            if (setting) {
+              Object.assign(setting, settingForm.value)
+            }
+            addLog({ type: 'info', message: `设定「${settingForm.value.name}」已更新` })
+            ElementPlus.ElMessage.success('设定已更新')
+          } else {
+            currentProject.value.worldSettings.push({
+              id: Date.now().toString(),
+              ...settingForm.value,
+              createdAt: new Date().toISOString()
+            })
+            addLog({ type: 'success', message: `设定「${settingForm.value.name}」已添加` })
+            ElementPlus.ElMessage.success('设定已添加')
+          }
+          saveToLocalStorage()
+          showSettingDialog.value = false
+          settingForm.value = { name: '', category: '世界观', content: '' }
+          editingSetting.value = null
+        }
+
+        const deleteSetting = async (setting) => {
+          try {
+            await ElementPlus.ElMessageBox.confirm(`确定要删除设定「${setting.name}」吗？`, '确认删除', { type: 'warning' })
+            const index = worldSettings.value.findIndex(s => s.id === setting.id)
+            if (index > -1) {
+              currentProject.value.worldSettings.splice(index, 1)
+              saveToLocalStorage()
+              addLog({ type: 'warning', message: `设定「${setting.name}」已删除` })
+              ElementPlus.ElMessage.success('已删除')
+            }
+          } catch {}
+        }
+
+        const exportProject = () => {
+          if (!currentProject.value) {
+            ElementPlus.ElMessage.warning('请先选择一个项目')
+            return
+          }
+          const dataStr = JSON.stringify({
+            projects: projects.value,
+            currentProjectId: currentProject.value.id,
+            exportTime: new Date().toISOString()
+          }, null, 2)
+          const blob = new Blob([dataStr], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `小说创作大师备份_${new Date().toLocaleDateString('zh-CN')}.json`
+          a.click()
+          URL.revokeObjectURL(url)
+          addLog({ type: 'success', message: '数据已导出' })
+          ElementPlus.ElMessage.success('导出成功！')
+        }
+
+        const importData = () => {
+          const input = document.createElement('input')
+          input.type = 'file'
+          input.accept = '.json'
+          input.onchange = (e) => {
+            const file = e.target.files[0]
+            if (file) {
+              const reader = new FileReader()
+              reader.onload = (event) => {
+                try {
+                  const data = JSON.parse(event.target.result)
+                  if (data.projects) {
+                    projects.value = data.projects
+                    if (data.currentProjectId) {
+                      currentProject.value = projects.value.find(p => p.id === data.currentProjectId) || null
+                    }
+                    saveToLocalStorage()
+                    addLog({ type: 'success', message: '数据已导入' })
+                    ElementPlus.ElMessage.success('导入成功！')
+                  }
+                } catch (err) {
+                  ElementPlus.ElMessage.error('文件格式错误')
+                }
+              }
+              reader.readAsText(file)
+            }
+          }
+          input.click()
+        }
+
+        const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('zh-CN')
+        const formatTime = (dateStr) => new Date(dateStr).toLocaleString('zh-CN')
+
+        onMounted(() => {
+          loadFromLocalStorage()
+          watch([projects, currentProject], () => {
+            saveToLocalStorage()
+          }, { deep: true })
+        })
+
+        return {
+          currentView, activeMenu, pageTitle,
+          projects, currentProject, chapters, logs,
+          showCreateDialog, showEditDialog, showChapterEdit,
+          showCharDialog, showSettingDialog,
+          editingProject, editChapter, editingChar, editingSetting,
+          selectedChapter, generating, generatingContent, stateUpdates,
+          formData, editFormData, outlineForm, charForm, settingForm, genOptions,
+          apiConfig, contactEmail, contactWechat,
+          projectChapters, characters, worldSettings,
+          handleMenuSelect,
+          createProject, selectProject, editProject, saveProjectEdit, deleteProject,
+          buildOutlinePrompt, generateOutline, generateNextChapter,
+          confirmChapterEdit, removeChapter, saveChapter, saveAllChapters,
+          buildGeneratePrompt, generateContent, copyPrompt, saveChapterContent,
+          saveCharacter, deleteCharacter, saveSetting, deleteSetting,
+          saveApiConfig, resetApiConfig, testApiConnection,
+          copyEmail, copyWechat,
+          exportProject, importData,
+          formatDate, formatTime
+        }
+      }
+    })
+
+    app.use(ElementPlus)
+    app.mount('#app')
+  </script>
+</body>
+</html>
