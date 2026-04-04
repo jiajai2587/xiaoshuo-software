@@ -143,6 +143,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projectStore'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { formatDate } from '@/utils/helpers'
 
 const router = useRouter()
 const projectStore = useProjectStore()
@@ -173,6 +174,10 @@ const createProject = async () => {
   await projectStore.createProject(formData.value)
   showCreateDialog.value = false
   ElMessage.success('项目创建成功')
+  resetForm()
+}
+
+const resetForm = () => {
   formData.value = {
     name: '',
     description: '',
@@ -245,11 +250,6 @@ const deleteProject = async (project) => {
     }
   } catch {
   }
-}
-
-const formatDate = (dateStr) => {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('zh-CN')
 }
 </script>
 

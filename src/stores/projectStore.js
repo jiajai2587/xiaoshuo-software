@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { storage, generateId } from '@/utils/helpers'
 
 const { ipcRenderer } = window.require ? window.require('electron') : { ipcRenderer: null }
 
@@ -32,7 +33,7 @@ export const useProjectStore = defineStore('project', () => {
 
   const createProject = async (projectData) => {
     const project = {
-      id: Date.now().toString(),
+      id: generateId(),
       name: projectData.name,
       description: projectData.description,
       createdAt: new Date().toISOString(),
@@ -80,7 +81,7 @@ export const useProjectStore = defineStore('project', () => {
   const addChapter = (chapter) => {
     if (!currentProject.value) return
     const newChapter = {
-      id: Date.now().toString(),
+      id: generateId(),
       number: currentProject.value.chapters.length + 1,
       title: chapter.title,
       outline: chapter.outline,
@@ -108,7 +109,7 @@ export const useProjectStore = defineStore('project', () => {
   const addCharacter = (character) => {
     if (!currentProject.value) return
     const newCharacter = {
-      id: Date.now().toString(),
+      id: generateId(),
       ...character,
       status: character.status || '初始状态',
       createdAt: new Date().toISOString()
@@ -130,7 +131,7 @@ export const useProjectStore = defineStore('project', () => {
   const addWorldSetting = (setting) => {
     if (!currentProject.value) return
     const newSetting = {
-      id: Date.now().toString(),
+      id: generateId(),
       ...setting,
       createdAt: new Date().toISOString()
     }
@@ -142,7 +143,7 @@ export const useProjectStore = defineStore('project', () => {
   const addLog = (log) => {
     if (!currentProject.value) return
     const newLog = {
-      id: Date.now().toString(),
+      id: generateId(),
       ...log,
       timestamp: new Date().toISOString()
     }
